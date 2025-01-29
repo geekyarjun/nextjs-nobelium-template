@@ -2,10 +2,14 @@ import { config as BLOG } from "@/lib/server/config";
 
 import { idToUuid } from "notion-utils";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import api from "@/lib/server/notion-api";
 import getAllPageIds from "./getAllPageIds";
 import getPageProperties from "./getPageProperties";
 import filterPublishedPosts from "./filterPublishedPosts";
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 /**
  * @param {{ includePages: boolean }} - false: posts only / true: include pages

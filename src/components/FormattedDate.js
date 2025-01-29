@@ -1,29 +1,30 @@
-import { useEffect, useState } from 'react'
-import dayjs from 'dayjs'
-import localizedFormat from 'dayjs/plugin/localizedFormat'
-import { useConfig } from '@/lib/config'
+"use client";
 
-dayjs.extend(localizedFormat)
+import { useEffect, useState } from "react";
+import dayjs from "dayjs";
+import localizedFormat from "dayjs/plugin/localizedFormat";
+import { useConfig } from "@/lib/config";
 
-const loaded = {}
+dayjs.extend(localizedFormat);
 
-export default function FormattedDate ({ date }) {
-  const lang = useConfig().lang.slice(0, 2)
-  const [isLocaleLoaded, setIsLocaleLoaded] = useState(loaded[lang] === true)
+const loaded = {};
+
+export default function FormattedDate({ date }) {
+  const lang = useConfig().lang.slice(0, 2);
+  const [isLocaleLoaded, setIsLocaleLoaded] = useState(loaded[lang] === true);
 
   useEffect(() => {
     if (!isLocaleLoaded) {
-      loaded[lang] ??= import(`dayjs/locale/${lang}`).then(
+      loaded[lang] ??= import(`dayjs/locale/${lang}.js`).then(
         () => {
-          loaded[lang] = true
-          dayjs.locale(lang)
+          loaded[lang] = true;
+          dayjs.locale(lang);
         },
         () => console.warn(`dayjs locale \`${lang}\` not found`)
-      )
-      loaded[lang].then(() => setIsLocaleLoaded(true))
+      );
+      loaded[lang].then(() => setIsLocaleLoaded(true));
     }
+  }, [isLocaleLoaded, lang]);
 
-  }, [isLocaleLoaded, lang])
-
-  return <span>{dayjs(date).format('ll')}</span>
+  return <span>{dayjs(date).format("ll")}</span>;
 }

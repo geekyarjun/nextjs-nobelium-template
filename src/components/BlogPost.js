@@ -1,3 +1,5 @@
+"use client";
+
 import FormattedDate from "@/components/FormattedDate";
 import { useConfig } from "@/lib/config";
 import Link from "next/link";
