@@ -1,13 +1,18 @@
-const fs = require('fs')
-const { resolve } = require('path')
+import fs from "fs";
+import { resolve } from "path";
 
-const raw = fs.readFileSync(resolve(process.cwd(), 'blog.config.js'), 'utf-8')
-const config = eval(`((module = { exports }) => { ${raw}; return module.exports })()`)
+export function getBlogConfig() {
+  const raw = fs.readFileSync(
+    resolve(process.cwd(), "blog.config.js"),
+    "utf-8"
+  );
+  const config = eval(
+    `((module = { exports }) => { ${raw}; return module.exports })()`
+  );
 
-// If we need to stripe out some private fields
-const clientConfig = config
+  // Only expose non-sensitive parts for client use
+  delete config.notionPageId;
+  delete config.notionAccessToken;
 
-module.exports = {
-  config,
-  clientConfig
+  return config;
 }
