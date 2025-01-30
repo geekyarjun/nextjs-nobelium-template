@@ -1,3 +1,7 @@
+"use client";
+
+// TODO: NEED TO REMOVE ALL THE BOILERPLATE CODE
+
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useConfig } from "@/lib/config";

@@ -1,14 +1,17 @@
 import { clientConfig } from "@/lib/server/config";
 
-import { useRouter } from "next/router";
+// import { useRouter } from "next/router";
 import cn from "classnames";
 import { getAllPosts, getPostBlocks } from "@/lib/notion";
-import { useLocale } from "@/lib/locale";
-import { useConfig } from "@/lib/config";
+// import { useLocale } from "@/lib/locale";
+// import { useConfig } from "@/lib/config";
 import { createHash } from "crypto";
 import Container from "@/components/Container";
 import Post from "@/components/Post";
 import Comments from "@/components/Comments";
+import BackButton from "./components/BackButton";
+import ScrollTop from "./components/ScrollTop";
+import { notFound } from "next/navigation";
 
 export default async function BlogPost({
   params,
@@ -18,13 +21,12 @@ export default async function BlogPost({
   const { slug } = await params;
 
   const posts = await getAllPosts({ includePages: true });
+
   const post = posts.find((t) => t.slug === slug);
 
-  const router = useRouter();
-  const BLOG = useConfig();
-  const locale = useLocale();
+  //   const router = useRouter();
 
-  if (!post) return { notFound: true };
+  if (!post) notFound();
 
   const blockMap = await getPostBlocks(post.id);
   const emailHash = createHash("md5")
@@ -34,9 +36,15 @@ export default async function BlogPost({
     .toLowerCase();
 
   // TODO: It would be better to render something
-  if (router.isFallback) return null;
+  //   if (router.isFallback) return null;
 
   const fullWidth = post.fullWidth ?? false;
+
+  //   return (
+  //     <div>
+  //       <p>Hello World</p>
+  //     </div>
+  //   );
 
   return (
     <Container
@@ -62,27 +70,8 @@ export default async function BlogPost({
           fullWidth ? "md:px-24" : "mx-auto max-w-2xl"
         )}
       >
-        <a>
-          <button
-            onClick={() => router.push(BLOG.path || "/")}
-            className="mt-2 cursor-pointer hover:text-black dark:hover:text-gray-100"
-          >
-            ← {locale.POST.BACK}
-          </button>
-        </a>
-        <a>
-          <button
-            onClick={() =>
-              window.scrollTo({
-                top: 0,
-                behavior: "smooth",
-              })
-            }
-            className="mt-2 cursor-pointer hover:text-black dark:hover:text-gray-100"
-          >
-            ↑ {locale.POST.TOP}
-          </button>
-        </a>
+        <BackButton />
+        <ScrollTop />
       </div>
 
       <Comments frontMatter={post} />
@@ -91,12 +80,15 @@ export default async function BlogPost({
 }
 
 // Return a list of `params` to populate the [slug] dynamic segment
-export async function generateStaticParams() {
-  const posts = await getAllPosts({ includePages: true });
-  return {
-    slug: posts.map((row) => `${clientConfig.path}/${row.slug}`),
-  };
-}
+// export async function generateStaticParams() {
+//   const posts = await getAllPosts({ includePages: true });
+//   const slug = posts.map((row) => `${clientConfig.path}/${row.slug}`);
+//   //   console.log("@@posts in generateStaticParams@@", slug);
+
+//   return {
+//     slug,
+//   };
+// }
 
 // export async function getStaticPaths() {
 //   const posts = await getAllPosts({ includePages: true });
