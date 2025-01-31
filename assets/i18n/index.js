@@ -1,6 +1,3 @@
-// TODO: WHY
-
-// const requireAsset = require.context('.', true, /^\.\/(\w+)\/([\w-]+)\.json$/, 'lazy')
 /**
  * Lazy-load lang data
  *

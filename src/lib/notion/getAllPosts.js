@@ -1,4 +1,4 @@
-import { config as BLOG } from "@/lib/server/config";
+import { getBlogConfig } from "@/lib/server/config";
 
 import { idToUuid } from "notion-utils";
 import dayjs from "dayjs";
@@ -16,6 +16,7 @@ dayjs.extend(timezone);
  */
 export async function getAllPosts({ includePages = false }) {
   try {
+    const blogConfig = getBlogConfig();
     const id = idToUuid(process.env.NOTION_PAGE_ID);
 
     const response = await api.getPage(id);
@@ -59,7 +60,7 @@ export async function getAllPosts({ includePages = false }) {
       const posts = filterPublishedPosts({ posts: data, includePages });
 
       // Sort by date
-      if (BLOG.sortByDate) {
+      if (blogConfig.sortByDate) {
         posts.sort((a, b) => b.date - a.date);
       }
       return posts;

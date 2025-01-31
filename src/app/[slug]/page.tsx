@@ -1,61 +1,87 @@
-import { clientConfig } from "@/lib/server/config";
-
-// import { useRouter } from "next/router";
 import cn from "classnames";
-import { getAllPosts, getPostBlocks } from "@/lib/notion";
-// import { useLocale } from "@/lib/locale";
-// import { useConfig } from "@/lib/config";
 import { createHash } from "crypto";
-import Container from "@/components/Container";
 import Post from "@/components/Post";
-import Comments from "@/components/Comments";
-import BackButton from "./components/BackButton";
-import ScrollTop from "./components/ScrollTop";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Comments from "@/components/Comments";
+import ScrollTop from "./components/ScrollTop";
+import Container from "@/components/Container";
+import BackButton from "./components/BackButton";
+import { getBlogConfig } from "@/lib/server/config";
+import { getAllPosts, getPostBlocks } from "@/lib/notion";
+
+export const revalidate = 1; // Revalidate every second
+
+export const generateMetadata = async ({ params }): Promise<Metadata> => {
+  const { slug } = await params;
+  const blogConfig = getBlogConfig(); // Load config on server side
+  const posts = await getAllPosts({ includePages: true });
+  const post = posts.find((t) => t.slug === slug);
+
+  const url = blogConfig.path.length
+    ? `${blogConfig.link}/${blogConfig.path}`
+    : blogConfig.link;
+
+  return {
+    description: post.summary,
+    openGraph: {
+      type: "article",
+      url: post.slug ? `${url}/${post.slug}` : url,
+      title: post.title,
+      description: post.summary,
+      images: `${blogConfig.ogImageGenerateURL}/${encodeURIComponent(
+        post.title
+      )}.png?theme=dark&md=1&fontSize=125px&images=https%3A%2F%2Fnobelium.vercel.app%2Flogo-for-dark-bg.svg`,
+    },
+    twitter: {
+      card: "summary_large_image",
+      description: post.summary,
+      title: post.title,
+      images: `${blogConfig.ogImageGenerateURL}/${encodeURIComponent(
+        post.title
+      )}.png?theme=dark&md=1&fontSize=125px&images=https%3A%2F%2Fnobelium.vercel.app%2Flogo-for-dark-bg.svg`,
+    },
+    other: {
+      "article:published_time": post.date,
+      "article:author": blogConfig.author,
+    },
+  };
+};
 
 export default async function BlogPost({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  const blogConfig = getBlogConfig(); // Load config on server side
   const { slug } = await params;
 
   const posts = await getAllPosts({ includePages: true });
 
   const post = posts.find((t) => t.slug === slug);
 
-  //   const router = useRouter();
-
   if (!post) notFound();
 
   const blockMap = await getPostBlocks(post.id);
   const emailHash = createHash("md5")
-    .update(clientConfig.email)
+    .update(blogConfig.email)
     .digest("hex")
     .trim()
     .toLowerCase();
 
-  // TODO: It would be better to render something
-  //   if (router.isFallback) return null;
-
   const fullWidth = post.fullWidth ?? false;
 
-  //   return (
-  //     <div>
-  //       <p>Hello World</p>
-  //     </div>
-  //   );
-
   return (
-    <Container
-      layout="blog"
-      title={post.title}
-      description={post.summary}
-      slug={post.slug}
-      // date={new Date(post.publishedAt).toISOString()}
-      type="article"
-      fullWidth={fullWidth}
-    >
+    // <Container
+    //   layout="blog"
+    //   title={post.title}
+    //   description={post.summary}
+    //   slug={post.slug}
+    //   // date={new Date(post.publishedAt).toISOString()}
+    //   type="article"
+    //   fullWidth={fullWidth}
+    // >
+    <>
       <Post
         post={post}
         blockMap={blockMap}
@@ -75,44 +101,19 @@ export default async function BlogPost({
       </div>
 
       <Comments frontMatter={post} />
-    </Container>
+    </>
+    // </Container>
   );
 }
 
 // Return a list of `params` to populate the [slug] dynamic segment
-// export async function generateStaticParams() {
-//   const posts = await getAllPosts({ includePages: true });
-//   const slug = posts.map((row) => `${clientConfig.path}/${row.slug}`);
-//   //   console.log("@@posts in generateStaticParams@@", slug);
+export async function generateStaticParams() {
+  const blogConfig = getBlogConfig(); // Load config on server side
+  const posts = await getAllPosts({ includePages: true });
+  const slug = posts.map((row) => `${blogConfig.path}/${row.slug}`);
+  //   console.log("@@posts in generateStaticParams@@", slug);
 
-//   return {
-//     slug,
-//   };
-// }
-
-// export async function getStaticPaths() {
-//   const posts = await getAllPosts({ includePages: true });
-//   return {
-//     paths: posts.map((row) => `${clientConfig.path}/${row.slug}`),
-//     fallback: true,
-//   };
-// }
-
-// export async function getStaticProps({ params: { slug } }) {
-//   const posts = await getAllPosts({ includePages: true });
-//   const post = posts.find((t) => t.slug === slug);
-
-//   if (!post) return { notFound: true };
-
-//   const blockMap = await getPostBlocks(post.id);
-//   const emailHash = createHash("md5")
-//     .update(clientConfig.email)
-//     .digest("hex")
-//     .trim()
-//     .toLowerCase();
-
-//   return {
-//     props: { post, blockMap, emailHash },
-//     revalidate: 1,
-//   };
-// }
+  return slug.map((s) => ({
+    slug: s,
+  }));
+}

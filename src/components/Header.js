@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useConfig } from "@/lib/config";
 import { useLocale } from "@/lib/locale";
 import useTheme from "@/lib/theme";
+import { useParams } from "next/navigation";
 
 const NavBar = () => {
   const BLOG = useConfig();
@@ -40,8 +41,17 @@ const NavBar = () => {
 };
 
 export default function Header({ navBarTitle, fullWidth }) {
+  // navBarTitle={layout === 'blog' ? meta.title : null}
   const BLOG = useConfig();
   const { dark } = useTheme();
+  const params = useParams();
+  const meta = {
+    title: BLOG.title,
+    type: "website",
+  };
+  const isSlug = Boolean(params.slug);
+  const _navBarTitle = navBarTitle || isSlug ? meta.title : null;
+  const _fullWidth = isSlug ? false : fullWidth;
 
   // Favicon
 
@@ -99,7 +109,7 @@ export default function Header({ navBarTitle, fullWidth }) {
       <div className="observer-element h-4 md:h-12" ref={sentinelRef}></div>
       <div
         className={`sticky-nav group m-auto w-full h-6 flex flex-row justify-between items-center mb-2 md:mb-12 py-8 bg-opacity-60 ${
-          !fullWidth ? "max-w-3xl px-4" : "px-4 md:px-24"
+          !_fullWidth ? "max-w-3xl px-4" : "px-4 md:px-24"
         }`}
         id="sticky-nav"
         ref={navRef}
@@ -128,7 +138,7 @@ export default function Header({ navBarTitle, fullWidth }) {
             ref={titleRef}
             siteTitle={BLOG.title}
             siteDescription={BLOG.description}
-            postTitle={navBarTitle}
+            postTitle={_navBarTitle}
             onClick={handleClickHeader}
           />
         </div>

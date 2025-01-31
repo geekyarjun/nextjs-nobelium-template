@@ -1,43 +1,24 @@
-import { clientConfig } from "@/lib/server/config";
-
-// import Container from "@/components/Container";
 import BlogPost from "@/components/BlogPost";
 import Pagination from "@/components/Pagination";
 import { getAllPosts } from "@/lib/notion";
-// import { useConfig } from '@/lib/config'
+import { getBlogConfig } from "@/lib/server/config";
 
-// export async function getStaticProps() {
-//   const posts = await getAllPosts({ includePages: false });
-//   const postsToShow = posts.slice(0, clientConfig.postsPerPage);
-//   const totalPosts = posts.length;
-//   const showNext = totalPosts > clientConfig.postsPerPage;
-//   return {
-//     props: {
-//       page: 1, // current page is 1
-//       postsToShow,
-//       showNext,
-//     },
-//     revalidate: 1,
-//   };
-// }
+export const revalidate = 1; // Revalidate every second
 
 export default async function Blog() {
-  // const { title, description } = useConfig()
+  const blogConfig = getBlogConfig();
   const posts = await getAllPosts({ includePages: false });
-  const postsToShow = posts.slice(0, clientConfig.postsPerPage);
+  const postsToShow = posts.slice(0, blogConfig.postsPerPage);
   const totalPosts = posts.length;
-  const showNext = totalPosts > clientConfig.postsPerPage;
+  const showNext = totalPosts > blogConfig.postsPerPage;
   const page = 1;
 
   return (
     <>
-      {/* <Container title={title} description={description}> */}
       {postsToShow.map((post) => (
         <BlogPost key={post.id} post={post} />
       ))}
       {showNext && <Pagination page={page} showNext={showNext} />}
-
-      {/* </Container> */}
     </>
   );
 }

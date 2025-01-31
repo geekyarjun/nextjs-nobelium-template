@@ -1,4 +1,6 @@
+import { getBlogConfig } from "./src/lib/server/config";
 import type { Config } from "tailwindcss";
+const blogConfig = getBlogConfig();
 
 export default {
   content: [
@@ -11,6 +13,12 @@ export default {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        day: {
+          DEFAULT: blogConfig.lightBackground || "#ffffff",
+        },
+        night: {
+          DEFAULT: blogConfig.darkBackground || "#111827",
+        },
       },
     },
   },
